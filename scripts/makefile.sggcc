@@ -1,7 +1,7 @@
 # makefile for libpng.a and libpng12.so, SGI IRIX with 'cc'
 # Copyright (C) 2001-2002, 2006 Glenn Randers-Pehrson
 # Copyright (C) 1995 Guy Eric Schalnat, Group 42, Inc.
-
+#
 # This code is released under the libpng license.
 # For conditions of distribution and use, see the disclaimer
 # and license in png.h
@@ -9,7 +9,7 @@
 # Library name:
 LIBNAME=libpng12
 PNGMAJ = 0
-PNGMIN = 1.2.38
+PNGMIN = 1.2.44
 PNGVER = $(PNGMAJ).$(PNGMIN)
 
 # Shared library names:

@@ -3,7 +3,7 @@
 # make includes && make install
 # Copyright (C) 2002 Patrick R.L. Welche
 # Copyright (C) 2007, 2009 Glenn Randers-Pehrson
-
+#
 # This code is released under the libpng license.
 # For conditions of distribution and use, see the disclaimer
 # and license in png.h
@@ -17,7 +17,7 @@ INCSDIR=${LOCALBASE}/include/libpng12
 
 LIB=	png12
 SHLIB_MAJOR=	0
-SHLIB_MINOR=	1.2.38
+SHLIB_MINOR=	1.2.44
 SRCS=	png.c pngset.c pngget.c pngrutil.c pngtrans.c pngwutil.c \
 	pngread.c pngrio.c pngwio.c pngwrite.c pngrtran.c \
 	pngwtran.c pngmem.c pngerror.c pngpread.c

@@ -3,7 +3,7 @@
 # Copyright (C) 2001, Laurent faillie
 # Copyright (C) 1998, 1999 Greg Roelofs
 # Copyright (C) 1996, 1997 Andreas Dilger
-
+#
 # This code is released under the libpng license.
 # For conditions of distribution and use, see the disclaimer
 # and license in png.h
@@ -11,7 +11,7 @@
 # Library name:
 LIBNAME = libpng12
 PNGMAJ = 0
-PNGMIN = 1.2.38
+PNGMIN = 1.2.44
 PNGVER = $(PNGMAJ).$(PNGMIN)
 
 # Shared library names:
