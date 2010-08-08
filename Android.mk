@@ -22,7 +22,8 @@ common_SRC_FILES := \
 	pngwtran.c \
 	pngwutil.c
 
-common_CFLAGS := ## -fomit-frame-pointer
+common_CFLAGS := \
+	-fvisibility=hidden ## -fomit-frame-pointer
 
 common_C_INCLUDES += \
 
