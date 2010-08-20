@@ -192,6 +192,10 @@ png_create_read_struct_2(png_const_charp user_png_ver, png_voidp error_ptr,
 #endif
 #endif /* PNG_SETJMP_SUPPORTED */
 
+#ifdef PNG_INDEX_SUPPORTED
+   png_ptr->index = NULL;
+#endif
+
    return (png_ptr);
 }
 
@@ -567,6 +571,11 @@ png_read_update_info(png_structp png_ptr, png_infop info_ptr)
  
    if (png_ptr == NULL)
       return;
+#ifdef PNG_INDEX_SUPPORTED
+   if (png_ptr->index) {
+      png_read_start_row(png_ptr);
+   }
+#endif
    if (!(png_ptr->flags & PNG_FLAG_ROW_INIT))
       png_read_start_row(png_ptr);
    else
@@ -736,7 +745,14 @@ png_read_row(png_structp png_ptr, png_bytep row, png_bytep dsp_row)
       {
          while (!png_ptr->idat_size)
          {
-            png_crc_finish(png_ptr, 0);
+#ifdef PNG_INDEX_SUPPORTED
+            if (png_ptr->index) {
+               png_opt_crc_finish(png_ptr, 0, 0);
+               png_ptr->index->stream_idat_position = png_ptr->total_data_read;
+            } else
+#endif
+               png_crc_finish(png_ptr, 0);
+
 
             png_ptr->idat_size = png_read_chunk_header(png_ptr);
             if (png_memcmp(png_ptr->chunk_name, png_IDAT, 4))
@@ -761,7 +777,10 @@ png_read_row(png_structp png_ptr, png_bytep row, png_bytep dsp_row)
          break;
       }
       if (ret != Z_OK)
-         png_error(png_ptr, png_ptr->zstream.msg ? png_ptr->zstream.msg :
+#ifdef PNG_INDEX_SUPPORTED
+         if (png_ptr->index && png_ptr->row_number != png_ptr->height - 1)
+#endif
+            png_error(png_ptr, png_ptr->zstream.msg ? png_ptr->zstream.msg :
                    "Decompression error");
 
    } while (png_ptr->zstream.avail_out);
@@ -892,6 +911,144 @@ png_read_rows(png_structp png_ptr, png_bytepp row,
       }
 }
 #endif /* PNG_SEQUENTIAL_READ_SUPPORTED */
+
+#ifdef PNG_INDEX_SUPPORTED
+#define IDAT_HEADER_SIZE 8
+
+/* Set the png read position to a new position based on idat_position and
+ * offset.
+ */
+void
+png_set_read_offset(png_structp png_ptr,
+      png_uint_32 idat_position, png_uint_32 bytes_left)
+{
+   png_seek_data(png_ptr, idat_position);
+   png_ptr->idat_size = png_read_chunk_header(png_ptr);
+
+   // We need to add back IDAT_HEADER_SIZE because in zlib's perspective,
+   // IDAT_HEADER in PNG is already stripped out.
+   png_seek_data(png_ptr, idat_position + IDAT_HEADER_SIZE + png_ptr->idat_size - bytes_left);
+   png_ptr->idat_size = bytes_left;
+}
+
+/* Configure png decoder to decode the pass starting from *row.
+ * The requested row may be adjusted to align with an indexing row.
+ * The actual row for the decoder to start its decoding will be returned in
+ * *row.
+ */
+void PNGAPI
+png_configure_decoder(png_structp png_ptr, int *row, int pass)
+{
+   png_indexp index = png_ptr->index;
+   int n = *row / index->step[pass];
+   png_line_indexp line_index = index->pass_line_index[pass][n];
+
+   // Adjust row to an indexing row.
+   *row = n * index->step[pass];
+   png_ptr->row_number = *row;
+
+#ifdef PNG_READ_INTERLACING_SUPPORTED
+   if (png_ptr->interlaced)
+      png_set_interlaced_pass(png_ptr, pass);
+#endif
+
+   long row_byte_length =
+      PNG_ROWBYTES(png_ptr->pixel_depth, png_ptr->iwidth) + 1;
+
+   inflateEnd(&png_ptr->zstream);
+   inflateCopy(&png_ptr->zstream, line_index->z_state);
+
+   // Set the png read position to line_index.
+   png_set_read_offset(png_ptr, line_index->stream_idat_position,
+         line_index->bytes_left_in_idat);
+   png_memcpy_check(png_ptr,
+         png_ptr->prev_row, line_index->prev_row, row_byte_length);
+   png_ptr->zstream.avail_in = 0;
+}
+
+/* Build the line index and store the index in png_ptr->index.
+ */
+void PNGAPI
+png_build_index(png_structp png_ptr)
+{
+   // number of rows in a 8x8 block for each interlaced pass.
+   int number_rows_in_pass[7] = {1, 1, 1, 2, 2, 4, 4};
+
+   int ret;
+   png_uint_32 i, j;
+   png_bytep rp;
+   int p, pass_number = 1;
+
+#ifdef PNG_READ_INTERLACING_SUPPORTED
+   pass_number = png_set_interlace_handling(png_ptr);
+#endif
+
+   if (png_ptr == NULL)
+      return;
+
+   png_read_start_row(png_ptr);
+
+#ifdef PNG_READ_INTERLACING_SUPPORTED
+   if (!png_ptr->interlaced)
+#endif
+   {
+      number_rows_in_pass[0] = 8;
+   }
+
+   rp = png_malloc(png_ptr, png_ptr->rowbytes);
+
+   png_indexp index = png_malloc(png_ptr, sizeof(png_index));
+   png_ptr->index = index;
+
+   index->stream_idat_position = png_ptr->total_data_read - IDAT_HEADER_SIZE;
+
+   // Set the default size of index in each pass to 0,
+   // so that we can free index correctly in png_destroy_read_struct.
+   for (p = 0; p < 7; p++)
+      index->size[p] = 0;
+
+   for (p = 0; p < pass_number; p++)
+   {
+      // We adjust the index step in each pass to make sure each pass
+      // has roughly the same size of index.
+      // This way, we won't consume to much memory in recording index.
+      index->step[p] = INDEX_SAMPLE_SIZE * (8 / number_rows_in_pass[p]);
+      index->size[p] =
+         (png_ptr->height + index->step[p] - 1) / index->step[p];
+      index->pass_line_index[p] =
+         png_malloc(png_ptr, index->size[p] * sizeof(png_line_indexp));
+
+      // Get the row_byte_length seen by the filter. This value may be
+      // different from the row_byte_length of a bitmap in the case of
+      // color palette mode.
+      int row_byte_length =
+         PNG_ROWBYTES(png_ptr->pixel_depth, png_ptr->iwidth) + 1;
+
+      // Now, we record index for each indexing row.
+      for (i = 0; i < index->size[p]; i++)
+      {
+         png_line_indexp line_index = png_malloc(png_ptr, sizeof(png_line_index));
+         index->pass_line_index[p][i] = line_index;
+
+         line_index->z_state = png_malloc(png_ptr, sizeof(z_stream));
+         inflateCopy(line_index->z_state, &png_ptr->zstream);
+         line_index->prev_row = png_malloc(png_ptr, row_byte_length);
+         png_memcpy_check(png_ptr,
+               line_index->prev_row, png_ptr->prev_row, row_byte_length);
+         line_index->stream_idat_position = index->stream_idat_position;
+         line_index->bytes_left_in_idat = png_ptr->idat_size + png_ptr->zstream.avail_in;
+
+         // Skip the "step" number of rows to the next indexing row.
+         for (j = 0; j < index->step[p] &&
+               i * index->step[p] + j < png_ptr->height; j++)
+         {
+            png_read_row(png_ptr, rp, png_bytep_NULL);
+         }
+      }
+   }
+   png_free(png_ptr, rp);
+}
+#endif
 
 #ifdef PNG_SEQUENTIAL_READ_SUPPORTED
 /* Read the entire image.  If the image has an alpha channel or a tRNS
@@ -1184,6 +1341,24 @@ png_destroy_read_struct(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr,
 
    if (png_ptr != NULL)
    {
+#ifdef PNG_INDEX_SUPPORTED
+      if (png_ptr->index) {
+         unsigned int i, p;
+         png_indexp index = png_ptr->index;
+         for (p = 0; p < 7; p++) {
+            for (i = 0; i < index->size[p]; i++) {
+               inflateEnd(index->pass_line_index[p][i]->z_state);
+               png_free(png_ptr, index->pass_line_index[p][i]->z_state);
+               png_free(png_ptr, index->pass_line_index[p][i]->prev_row);
+               png_free(png_ptr, index->pass_line_index[p][i]);
+            }
+            if (index->size[p] != 0) {
+               png_free(png_ptr, index->pass_line_index[p]);
+            }
+         }
+         png_free(png_ptr, index);
+      }
+#endif
 #ifdef PNG_USER_MEM_SUPPORTED
       png_destroy_struct_2((png_voidp)png_ptr, (png_free_ptr)free_fn,
           (png_voidp)mem_ptr);

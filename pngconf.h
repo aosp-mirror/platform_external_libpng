@@ -22,6 +22,10 @@
 
 #define PNG_1_2_X
 
+#ifndef PNG_NO_INDEX_SUPPORTED
+#  define PNG_INDEX_SUPPORTED
+#endif
+
 /*
  * PNG_USER_CONFIG has to be defined on the compiler command line. This
  * includes the resource compiler for Windows DLL configurations.

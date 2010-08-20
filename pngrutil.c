@@ -144,13 +144,14 @@ png_crc_read(png_structp png_ptr, png_bytep buf, png_size_t length)
    png_calculate_crc(png_ptr, buf, length);
 }
 
+#ifdef PNG_INDEX_SUPPORTED
 /* Optionally skip data and then check the CRC.  Depending on whether we
  * are reading a ancillary or critical chunk, and how the program has set
  * things up, we may calculate the CRC on the data and print a message.
  * Returns '1' if there was a CRC error, '0' otherwise.
  */
 int /* PRIVATE */
-png_crc_finish(png_structp png_ptr, png_uint_32 skip)
+png_opt_crc_finish(png_structp png_ptr, png_uint_32 skip, int check_crc)
 {
    png_size_t i;
    png_size_t istop = png_ptr->zbuf_size;
@@ -166,6 +167,10 @@ png_crc_finish(png_structp png_ptr, png_uint_32 skip)
 
    if (png_crc_error(png_ptr))
    {
+      if (!check_crc) {
+         png_chunk_warning(png_ptr, "CRC error");
+         return (1);
+      }
       if (((png_ptr->chunk_name[0] & 0x20) &&                /* Ancillary */
           !(png_ptr->flags & PNG_FLAG_CRC_ANCILLARY_NOWARN)) ||
           (!(png_ptr->chunk_name[0] & 0x20) &&             /* Critical  */
@@ -181,6 +186,18 @@ png_crc_finish(png_structp png_ptr, png_uint_32 skip)
    }
 
    return (0);
+}
+#endif
+
+/* Optionally skip data and then check the CRC.  Depending on whether we
+ * are reading a ancillary or critical chunk, and how the program has set
+ * things up, we may calculate the CRC on the data and print a message.
+ * Returns '1' if there was a CRC error, '0' otherwise.
+ */
+int /* PRIVATE */
+png_crc_finish(png_structp png_ptr, png_uint_32 skip)
+{
+   return png_opt_crc_finish(png_ptr, skip, 1);
 }
 
 /* Compare the CRC stored in the PNG file with that calculated by libpng from
@@ -3044,6 +3061,32 @@ png_read_filter_row(png_structp png_ptr, png_row_infop row_info, png_bytep row,
          break;
    }
 }
+
+#ifdef PNG_INDEX_SUPPORTED
+void /* PRIVATE */
+png_set_interlaced_pass(png_structp png_ptr, int pass)
+{
+   /* Arrays to facilitate easy interlacing - use pass (0 - 6) as index */
+
+   /* Start of interlace block */
+   PNG_CONST int png_pass_start[7] = {0, 4, 0, 2, 0, 1, 0};
+
+   /* Offset to next interlace block */
+   PNG_CONST int png_pass_inc[7] = {8, 8, 4, 4, 2, 2, 1};
+
+   /* Start of interlace block in the y direction */
+   PNG_CONST int png_pass_ystart[7] = {0, 0, 4, 0, 2, 0, 1};
+
+   /* Offset to next interlace block in the y direction */
+   PNG_CONST int png_pass_yinc[7] = {8, 8, 8, 4, 4, 2, 2};
+
+   png_ptr->pass = pass;
+   png_ptr->iwidth = (png_ptr->width +
+         png_pass_inc[png_ptr->pass] - 1 -
+         png_pass_start[png_ptr->pass]) /
+      png_pass_inc[png_ptr->pass];
+}
+#endif
 
 #ifdef PNG_SEQUENTIAL_READ_SUPPORTED
 void /* PRIVATE */

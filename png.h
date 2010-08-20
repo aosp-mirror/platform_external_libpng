@@ -765,6 +765,50 @@ typedef png_unknown_chunk FAR * png_unknown_chunkp;
 typedef png_unknown_chunk FAR * FAR * png_unknown_chunkpp;
 #endif
 
+#ifdef PNG_INDEX_SUPPORTED
+/* png_line_index_struct records an index point, where we impose an index point
+ * to be located at the beginning of a line for simplifying the implementation.
+ */
+typedef struct png_line_index_struct
+{
+   // state of the lz decoder
+   z_streamp   z_state;
+
+   // the IDAT header position of the chunk, which the index point is in
+   png_uint_32  stream_idat_position;
+
+   // we intend to record the offset of the index point in the chunk,
+   // but we record the number of remaining bytes in the chunk after the
+   // index point. That's because PNG processes a chunk this way.
+   png_uint_32  bytes_left_in_idat;
+
+   // decompressed data of the previous row
+   png_bytep   prev_row;
+} png_line_index;
+typedef png_line_index FAR * png_line_indexp;
+
+typedef struct png_index_struct
+{
+   // A temporary variable used when we build the index. The variable records
+   // the IDAT header position of the last chunk read in so far.
+   png_uint_32  stream_idat_position;
+
+   // line index information about each passes
+
+   // the number of index points in each pass
+   png_uint_32  size[7];
+
+   // the line span of two index points of each pass
+   png_uint_32  step[7];
+
+   // the index points of each pass
+   png_line_indexp  *pass_line_index[7];
+} png_index;
+typedef png_index FAR * png_indexp;
+
+#define INDEX_SAMPLE_SIZE 254
+#endif
+
 /* png_info is a structure that holds the information in a PNG file so
  * that the application can find out the characteristics of the image.
  * If you are reading the file, this structure will tell you what is
@@ -1171,6 +1215,9 @@ typedef png_struct FAR * png_structp;
 
 typedef void (PNGAPI *png_error_ptr) PNGARG((png_structp, png_const_charp));
 typedef void (PNGAPI *png_rw_ptr) PNGARG((png_structp, png_bytep, png_size_t));
+#ifdef PNG_INDEX_SUPPORTED
+typedef void (PNGAPI *png_seek_ptr) PNGARG((png_structp, png_uint_32));
+#endif
 typedef void (PNGAPI *png_flush_ptr) PNGARG((png_structp));
 typedef void (PNGAPI *png_read_status_ptr) PNGARG((png_structp, png_uint_32,
    int));
@@ -1243,6 +1290,9 @@ struct png_struct_def
    png_voidp error_ptr PNG_DEPSTRUCT;       /* user supplied struct for error functions */
    png_rw_ptr write_data_fn PNG_DEPSTRUCT;  /* function for writing output data */
    png_rw_ptr read_data_fn PNG_DEPSTRUCT;   /* function for reading input data */
+#ifdef PNG_INDEX_SUPPORTED
+   png_seek_ptr seek_data_fn PNG_DEPSTRUCT; /* function for seeking input data */
+#endif
    png_voidp io_ptr PNG_DEPSTRUCT;          /* ptr to application struct for I/O functions */
 
 #ifdef PNG_READ_USER_TRANSFORM_SUPPORTED
@@ -1533,14 +1583,17 @@ struct png_struct_def
    png_unknown_chunk unknown_chunk PNG_DEPSTRUCT;
 #endif
 
+#ifdef PNG_INDEX_SUPPORTED
+   png_indexp index PNG_DEPSTRUCT;
+   png_uint_32 total_data_read;
+#endif
+
 /* New members added in libpng-1.2.26 */
   png_uint_32 old_big_row_buf_size PNG_DEPSTRUCT;
   png_uint_32 old_prev_row_size PNG_DEPSTRUCT;
 
 /* New member added in libpng-1.2.30 */
   png_charp chunkdata PNG_DEPSTRUCT;  /* buffer for reading chunk data */
-
-
 };
 
 
@@ -1843,6 +1896,14 @@ extern PNG_EXPORT(void,png_read_row) PNGARG((png_structp png_ptr,
    png_bytep display_row));
 #endif
 
+#ifdef PNG_INDEX_SUPPORTED
+/* Build image index for partial image decoding. */
+extern PNG_EXPORT(void,png_build_index) PNGARG((png_structp png_ptr));
+extern PNG_EXPORT(void,png_configure_decoder)
+    PNGARG((png_structp png_ptr, int *row_offset, int pass));
+#endif
+
+
 #ifndef PNG_NO_SEQUENTIAL_READ_SUPPORTED
 /* Read the whole image into memory at once. */
 extern PNG_EXPORT(void,png_read_image) PNGARG((png_structp png_ptr,
@@ -2058,6 +2119,14 @@ extern PNG_EXPORT(void,png_set_write_fn) PNGARG((png_structp png_ptr,
 /* Replace the default data input function with a user supplied one. */
 extern PNG_EXPORT(void,png_set_read_fn) PNGARG((png_structp png_ptr,
    png_voidp io_ptr, png_rw_ptr read_data_fn));
+
+#ifdef PNG_INDEX_SUPPORTED
+/* Set the data seek function with a user supplied one.
+ * REQUIRED by partial image decode.
+ */
+extern PNG_EXPORT(void,png_set_seek_fn) PNGARG((png_structp png_ptr,
+   png_seek_ptr seek_data_fn));
+#endif
 
 /* Return the user pointer associated with the I/O functions */
 extern PNG_EXPORT(png_voidp,png_get_io_ptr) PNGARG((png_structp png_ptr));
@@ -3189,6 +3258,11 @@ PNG_EXTERN void png_write_data PNGARG((png_structp png_ptr, png_bytep data,
 PNG_EXTERN void png_read_data PNGARG((png_structp png_ptr, png_bytep data,
    png_size_t length)) PNG_PRIVATE;
 
+#ifdef PNG_INDEX_SUPPORTED
+PNG_EXTERN void png_seek_data PNGARG((png_structp png_ptr,
+   png_uint_32 length)) PNG_PRIVATE;
+#endif
+
 /* Read bytes into buf, and update png_ptr->crc */
 PNG_EXTERN void png_crc_read PNGARG((png_structp png_ptr, png_bytep buf,
    png_size_t length)) PNG_PRIVATE;
@@ -3204,6 +3278,13 @@ PNG_EXTERN void png_decompress_chunk PNGARG((png_structp png_ptr,
 /* Read "skip" bytes, read the file crc, and (optionally) verify png_ptr->crc */
 PNG_EXTERN int png_crc_finish PNGARG((png_structp png_ptr, png_uint_32 skip)
    PNG_PRIVATE);
+
+#ifdef PNG_INDEX_SUPPORTED
+/* Read "skip" bytes, read the file crc, and (optionally) verify png_ptr->crc */
+PNG_EXTERN int png_opt_crc_finish PNGARG((png_structp png_ptr,
+   png_uint_32 skip, int check_crc)
+   PNG_PRIVATE);
+#endif
 
 /* Read the CRC from the file and compare it to the libpng calculated CRC */
 PNG_EXTERN int png_crc_error PNGARG((png_structp png_ptr)) PNG_PRIVATE;
@@ -3410,6 +3491,11 @@ PNG_EXTERN void png_write_filtered_row PNGARG((png_structp png_ptr,
    png_bytep filtered_row)) PNG_PRIVATE;
 /* Finish a row while reading, dealing with interlacing passes, etc. */
 PNG_EXTERN void png_read_finish_row PNGARG((png_structp png_ptr));
+
+#ifdef PNG_INDEX_SUPPORTED
+/* Update the decoder status to the given pass */
+PNG_EXTERN void png_set_interlaced_pass PNGARG((png_structp png_ptr, int pass));
+#endif
 
 /* Initialize the row buffers, etc. */
 PNG_EXTERN void png_read_start_row PNGARG((png_structp png_ptr)) PNG_PRIVATE;
