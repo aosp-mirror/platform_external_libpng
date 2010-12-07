@@ -1509,7 +1509,11 @@ typedef z_stream FAR *  png_zstreamp;
 #  define PNGAPI
 #endif
 #ifndef PNG_IMPEXP
-#  define PNG_IMPEXP
+#  if ((__GNUC__-0) * 10 + __GNUC_MINOR__-0 >= 33)
+#    define PNG_IMPEXP  __attribute__((visibility ("default")))
+#  else
+#    define PNG_IMPEXP
+#  endif
 #endif
 
 #ifdef PNG_BUILDSYMS
