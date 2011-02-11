@@ -22,10 +22,18 @@ common_SRC_FILES := \
 	pngwtran.c \
 	pngwutil.c
 
-common_CFLAGS := \
-	-fvisibility=hidden ## -fomit-frame-pointer
+common_CFLAGS := -fvisibility=hidden ## -fomit-frame-pointer
 
-common_C_INCLUDES += \
+ifeq ($(HOST_OS),windows)
+  ifeq ($(USE_MINGW),)
+    # Case where we're building windows but not under linux (so it must be cygwin)
+    # In this case, gcc cygwin doesn't recognize -fvisibility=hidden
+    $(info libpng: Ignoring gcc flag $(common_CFLAGS) on Cygwin)
+    common_CFLAGS := 
+  endif
+endif
+
+common_C_INCLUDES += 
 
 common_COPY_HEADERS_TO := libpng
 common_COPY_HEADERS := png.h pngconf.h pngusr.h
