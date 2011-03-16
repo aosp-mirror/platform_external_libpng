@@ -776,13 +776,18 @@ png_read_row(png_structp png_ptr, png_bytep row, png_bytep dsp_row)
          png_ptr->flags |= PNG_FLAG_ZLIB_FINISHED;
          break;
       }
-      if (ret != Z_OK)
+      if (ret != Z_OK) {
 #ifdef PNG_INDEX_SUPPORTED
-         if (png_ptr->index && png_ptr->row_number != png_ptr->height - 1)
+         if (png_ptr->index) {
+            if (png_ptr->row_number != png_ptr->height - 1) {
+               png_error(png_ptr, png_ptr->zstream.msg ? png_ptr->zstream.msg :
+                     "Decompression error");
+            }
+         } else
 #endif
             png_error(png_ptr, png_ptr->zstream.msg ? png_ptr->zstream.msg :
-                   "Decompression error");
-
+                  "Decompression error");
+      }
    } while (png_ptr->zstream.avail_out);
 
    png_ptr->row_info.color_type = png_ptr->color_type;
