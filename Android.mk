@@ -59,9 +59,9 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 # =====================================================
 
 include $(CLEAR_VARS)
-
+LOCAL_CLANG := true
 LOCAL_SRC_FILES := $(common_SRC_FILES)
-LOCAL_CFLAGS += $(common_CFLAGS)
+LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
 	external/zlib
 LOCAL_SHARED_LIBRARIES := \
@@ -73,5 +73,3 @@ LOCAL_COPY_HEADERS_TO := $(common_COPY_HEADERS_TO)
 LOCAL_COPY_HEADERS := $(common_COPY_HEADERS)
 
 include $(BUILD_STATIC_LIBRARY)
-
-
