@@ -15,6 +15,7 @@
 #define PNG_NO_EXTERN
 #define PNG_NO_PEDANTIC_WARNINGS
 #include "png.h"
+#include <stdint.h>
 
 /* Generate a compiler error if there is an old png.h in the search path. */
 typedef version_1_2_46 Your_png_h_is_not_version_1_2_46;
@@ -844,44 +845,13 @@ png_convert_size(size_t size)
 #ifdef PNG_cHRM_SUPPORTED
 #ifdef PNG_CHECK_cHRM_SUPPORTED
 
-/*
- *    Multiply two 32-bit numbers, V1 and V2, using 32-bit
- *    arithmetic, to produce a 64 bit result in the HI/LO words.
- *
- *                  A B
- *                x C D
- *               ------
- *              AD || BD
- *        AC || CB || 0
- *
- *    where A and B are the high and low 16-bit words of V1,
- *    C and D are the 16-bit words of V2, AD is the product of
- *    A and D, and X || Y is (X << 16) + Y.
-*/
-
 void /* PRIVATE */
 png_64bit_product (long v1, long v2, unsigned long *hi_product,
    unsigned long *lo_product)
 {
-   int a, b, c, d;
-   long lo, hi, x, y;
-
-   a = (v1 >> 16) & 0xffff;
-   b = v1 & 0xffff;
-   c = (v2 >> 16) & 0xffff;
-   d = v2 & 0xffff;
-
-   lo = b * d;                   /* BD */
-   x = a * d + c * b;            /* AD + CB */
-   y = ((lo >> 16) & 0xffff) + x;
-
-   lo = (lo & 0xffff) | ((y & 0xffff) << 16);
-   hi = (y >> 16) & 0xffff;
-
-   hi += a * c;                  /* AC */
-
-   *hi_product = (unsigned long)hi;
-   *lo_product = (unsigned long)lo;
+   int64_t x = (int64_t)v1 * (int64_t)v2;
+   *hi_product = (unsigned long) (x >> 32);
+   *lo_product = (unsigned long) x;
 }
 
 int /* PRIVATE */
