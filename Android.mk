@@ -55,7 +55,23 @@ LOCAL_COPY_HEADERS := $(common_COPY_HEADERS)
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 
-# For the device
+# For the device (static)
+# =====================================================
+
+include $(CLEAR_VARS)
+LOCAL_CLANG := true
+LOCAL_SRC_FILES := $(common_SRC_FILES)
+LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
+LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
+	external/zlib
+LOCAL_SHARED_LIBRARIES := \
+	libz
+
+LOCAL_MODULE:= libpng
+
+include $(BUILD_STATIC_LIBRARY)
+
+# For the device (shared)
 # =====================================================
 
 include $(CLEAR_VARS)
@@ -72,15 +88,16 @@ LOCAL_MODULE:= libpng
 LOCAL_COPY_HEADERS_TO := $(common_COPY_HEADERS_TO)
 LOCAL_COPY_HEADERS := $(common_COPY_HEADERS)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # For testing
 # =====================================================
 
 include $(CLEAR_VARS)
+LOCAL_CLANG := true
 LOCAL_C_INCLUDES:= $(common_C_INCLUDES) external/zlib
-LOCAL_SRC_FILES:= $(common_SRC_FILES) pngtest.c
+LOCAL_SRC_FILES:= pngtest.c
 LOCAL_MODULE := pngtest
-LOCAL_SHARED_LIBRARIES:= libz
+LOCAL_SHARED_LIBRARIES:= libpng libz
 LOCAL_MODULE_TAGS := debug
 include $(BUILD_EXECUTABLE)
