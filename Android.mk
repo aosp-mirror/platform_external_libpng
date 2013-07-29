@@ -6,7 +6,6 @@ LOCAL_PATH:= $(call my-dir)
 common_SRC_FILES := \
 	png.c \
 	pngerror.c \
-	pnggccrd.c \
 	pngget.c \
 	pngmem.c \
 	pngpread.c \
@@ -16,21 +15,30 @@ common_SRC_FILES := \
 	pngrutil.c \
 	pngset.c \
 	pngtrans.c \
-	pngvcrd.c \
 	pngwio.c \
 	pngwrite.c \
 	pngwtran.c \
-	pngwutil.c
+	pngwutil.c \
 
-common_CFLAGS := -std=gnu89 -fvisibility=hidden ## -fomit-frame-pointer
+ifeq ($(ARCH_ARM_HAVE_NEON),true)
+#	LOCAL_CFLAGS += -DPNG_ARM_NEON_OPT
+	common_SRC_FILES += \
+		arm/arm_init.c \
+		arm/filter_neon.S
+else
+	common_SRC_FILES := aoeusnth3.c
+endif
+
+
+common_CFLAGS := -std=gnu89 #-fvisibility=hidden ## -fomit-frame-pointer
 
 ifeq ($(HOST_OS),windows)
-  ifeq ($(USE_MINGW),)
-    # Case where we're building windows but not under linux (so it must be cygwin)
-    # In this case, gcc cygwin doesn't recognize -fvisibility=hidden
-    $(info libpng: Ignoring gcc flag $(common_CFLAGS) on Cygwin)
-    common_CFLAGS := 
-  endif
+	ifeq ($(USE_MINGW),)
+#		Case where we're building windows but not under linux (so it must be cygwin)
+#		In this case, gcc cygwin doesn't recognize -fvisibility=hidden
+		$(info libpng: Ignoring gcc flag $(common_CFLAGS) on Cygwin)
+	common_CFLAGS := 
+	endif
 endif
 
 common_C_INCLUDES += 
