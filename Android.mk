@@ -20,13 +20,11 @@ common_SRC_FILES := \
 	pngwtran.c \
 	pngwutil.c \
 
-ifeq ($(ARCH_ARM_HAVE_NEON),true)
-#	LOCAL_CFLAGS += -DPNG_ARM_NEON_OPT
+ifeq ($(strip $(TARGET_ARCH)),arm)
+	LOCAL_CFLAGS += -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
 	common_SRC_FILES += \
 		arm/arm_init.c \
 		arm/filter_neon.S
-else
-	common_SRC_FILES := aoeusnth3.c
 endif
 
 
