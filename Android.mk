@@ -20,12 +20,13 @@ common_SRC_FILES := \
 	pngwtran.c \
 	pngwutil.c \
 
-ifeq ($(strip $(TARGET_ARCH)),arm)
-	LOCAL_CFLAGS += -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
-	common_SRC_FILES += \
-		arm/arm_init.c \
-		arm/filter_neon.S
-endif
+# Previously these arm-specific flags were never applied.
+# TODO: apply the flags and fix the build.
+# my_cflags_arm := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
+my_cflags_arm :=
+my_src_files_arm := \
+    arm/arm_init.c \
+    arm/filter_neon.S
 
 
 common_CFLAGS := -std=gnu89 #-fvisibility=hidden ## -fomit-frame-pointer
@@ -35,11 +36,11 @@ ifeq ($(HOST_OS),windows)
 #		Case where we're building windows but not under linux (so it must be cygwin)
 #		In this case, gcc cygwin doesn't recognize -fvisibility=hidden
 		$(info libpng: Ignoring gcc flag $(common_CFLAGS) on Cygwin)
-	common_CFLAGS := 
+	common_CFLAGS :=
 	endif
 endif
 
-common_C_INCLUDES += 
+common_C_INCLUDES +=
 
 common_COPY_HEADERS_TO := libpng
 common_COPY_HEADERS := png.h pngconf.h pngusr.h
@@ -68,6 +69,9 @@ include $(CLEAR_VARS)
 LOCAL_CLANG := true
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
+LOCAL_CFLAGS_arm := $(my_cflags_arm)
+LOCAL_SRC_FILES_arm := $(my_src_files_arm)
+
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
 	external/zlib
 LOCAL_SHARED_LIBRARIES := \
@@ -84,6 +88,9 @@ include $(CLEAR_VARS)
 LOCAL_CLANG := true
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
+LOCAL_CFLAGS_arm := $(my_cflags_arm)
+LOCAL_SRC_FILES_arm := $(my_src_files_arm)
+
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
 	external/zlib
 LOCAL_SHARED_LIBRARIES := \
