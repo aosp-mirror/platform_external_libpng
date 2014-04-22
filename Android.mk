@@ -24,6 +24,11 @@ common_SRC_FILES := \
 # TODO: apply the flags and fix the build.
 # my_cflags_arm := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
 my_cflags_arm :=
+
+# BUG: http://llvm.org/PR19472 - SLP vectorization (on ARM at least) crashes
+# when we can't lower a vectorized bswap.
+my_cflags_arm += -fno-slp-vectorize
+
 my_src_files_arm := \
     arm/arm_init.c \
     arm/filter_neon.S
