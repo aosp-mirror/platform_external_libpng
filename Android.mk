@@ -45,6 +45,11 @@ ifeq ($(HOST_OS),windows)
 	endif
 endif
 
+ifeq ($(HOST_OS),darwin)
+common_CFLAGS += -no-integrated-as
+common_ASFLAGS += -no-integrated-as
+endif
+
 common_C_INCLUDES +=
 
 common_COPY_HEADERS_TO := libpng
@@ -57,6 +62,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
+LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) external/zlib
 
 LOCAL_MODULE:= libpng
@@ -75,6 +81,7 @@ LOCAL_CLANG := true
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
 LOCAL_CFLAGS_arm := $(my_cflags_arm)
+LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_SRC_FILES_arm := $(my_src_files_arm)
 
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
@@ -94,6 +101,7 @@ LOCAL_CLANG := true
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
 LOCAL_CFLAGS_arm := $(my_cflags_arm)
+LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_SRC_FILES_arm := $(my_src_files_arm)
 
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
