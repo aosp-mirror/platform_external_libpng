@@ -1,8 +1,8 @@
 
 /* pngrio.c - functions for data input
  *
- * Last changed in libpng 1.6.0 [February 14, 2013]
- * Copyright (c) 1998-2013 Glenn Randers-Pehrson
+ * Last changed in libpng 1.6.9 [February 6, 2014]
+ * Copyright (c) 1998-2014 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
@@ -38,21 +38,7 @@ png_read_data(png_structrp png_ptr, png_bytep data, png_size_t length)
 
    else
       png_error(png_ptr, "Call to NULL read function");
-#ifdef PNG_INDEX_SUPPORTED
-   png_ptr->total_data_read += length;
-#endif
 }
-
-#ifdef PNG_INDEX_SUPPORTED
-void /* PRIVATE */
-png_seek_data(png_structp png_ptr, png_uint_32 offset)
-{
-   if (png_ptr->seek_data_fn != NULL)
-      (*(png_ptr->seek_data_fn))(png_ptr, offset);
-   else
-      png_error(png_ptr, "Call to NULL seek function");
-}
-#endif
 
 #ifdef PNG_STDIO_SUPPORTED
 /* This is the function that does the actual reading of data.  If you are
@@ -116,6 +102,7 @@ png_set_read_fn(png_structrp png_ptr, png_voidp io_ptr,
    png_ptr->read_data_fn = read_data_fn;
 #endif
 
+#ifdef PNG_WRITE_SUPPORTED
    /* It is an error to write to a read device */
    if (png_ptr->write_data_fn != NULL)
    {
@@ -124,20 +111,10 @@ png_set_read_fn(png_structrp png_ptr, png_voidp io_ptr,
           "Can't set both read_data_fn and write_data_fn in the"
           " same structure");
    }
+#endif
 
 #ifdef PNG_WRITE_FLUSH_SUPPORTED
    png_ptr->output_flush_fn = NULL;
 #endif
 }
-
-#ifdef PNG_INDEX_SUPPORTED
-void PNGAPI
-png_set_seek_fn(png_structp png_ptr, png_seek_ptr seek_data_fn)
-{
-   if (png_ptr == NULL)
-      return;
-   png_ptr->seek_data_fn = seek_data_fn;
-}
-#endif
-
 #endif /* PNG_READ_SUPPORTED */
