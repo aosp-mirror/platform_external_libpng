@@ -1928,6 +1928,15 @@ PNG_INTERNAL_FUNCTION(void, png_init_filter_functions_neon,
    (png_structp png_ptr, unsigned int bpp), PNG_EMPTY);
 #endif
 
+#ifdef PNG_INDEX_SUPPORTED
+PNG_INTERNAL_FUNCTION(void, png_seek_data, (png_structp png_ptr,
+   png_uint_32 length), PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(int, png_opt_crc_finish,(png_structrp png_ptr,
+   png_uint_32 skip), PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void, png_set_interlaced_pass,(png_structrp png_ptr,
+   int pass), PNG_EMPTY);
+#endif
+
 /* Maintainer: Put new private prototypes here ^ */
 
 #include "pngdebug.h"

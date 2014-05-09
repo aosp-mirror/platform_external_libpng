@@ -141,6 +141,50 @@ typedef const png_colorspace * PNG_RESTRICT png_const_colorspacerp;
 #define PNG_COLORSPACE_CANCEL(flags)        (0xffff ^ (flags))
 #endif /* COLORSPACE || GAMMA */
 
+#ifdef PNG_INDEX_SUPPORTED
+/* png_line_index_struct records an index point, where we impose an index point
+ * to be located at the beginning of a line for simplifying the implementation.
+ */
+typedef struct png_line_index_struct
+{
+   // state of the lz decoder
+   z_streamp   z_state;
+
+   // the IDAT header position of the chunk, which the index point is in
+   png_uint_32  stream_idat_position;
+
+   // we intend to record the offset of the index point in the chunk,
+   // but we record the number of remaining bytes in the chunk after the
+   // index point. That's because PNG processes a chunk this way.
+   png_uint_32  bytes_left_in_idat;
+
+   // decompressed data of the previous row
+   png_bytep   prev_row;
+} png_line_index;
+typedef png_line_index FAR * png_line_indexp;
+
+typedef struct png_index_struct
+{
+   // A temporary variable used when we build the index. The variable records
+   // the IDAT header position of the last chunk read in so far.
+   png_uint_32  stream_idat_position;
+
+   // line index information about each passes
+
+   // the number of index points in each pass
+   png_uint_32  size[7];
+
+   // the line span of two index points of each pass
+   png_uint_32  step[7];
+
+   // the index points of each pass
+   png_line_indexp  *pass_line_index[7];
+} png_index;
+typedef png_index FAR * png_indexp;
+
+#define INDEX_SAMPLE_SIZE 254
+#endif
+
 struct png_struct_def
 {
 #ifdef PNG_SETJMP_SUPPORTED
@@ -156,6 +200,9 @@ struct png_struct_def
    png_voidp error_ptr;       /* user supplied struct for error functions */
    png_rw_ptr write_data_fn;  /* function for writing output data */
    png_rw_ptr read_data_fn;   /* function for reading input data */
+#ifdef PNG_INDEX_SUPPORTED
+   png_seek_ptr seek_data_fn; /* function for seeking input data */
+#endif
    png_voidp io_ptr;          /* ptr to application struct for I/O functions */
 
 #ifdef PNG_READ_USER_TRANSFORM_SUPPORTED
@@ -485,5 +532,11 @@ struct png_struct_def
    png_colorspace   colorspace;
 #endif
 #endif
+
+#ifdef PNG_INDEX_SUPPORTED
+   png_indexp index;
+   png_uint_32 total_data_read;
+#endif
+
 };
 #endif /* PNGSTRUCT_H */

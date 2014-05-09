@@ -901,6 +901,10 @@ typedef PNG_CALLBACK(void, *png_read_status_ptr, (png_structp, png_uint_32,
 typedef PNG_CALLBACK(void, *png_write_status_ptr, (png_structp, png_uint_32,
     int));
 
+#ifdef PNG_INDEX_SUPPORTED
+typedef PNG_CALLBACK(void, *png_seek_ptr, (png_structp, png_uint_32));
+#endif
+
 #ifdef PNG_PROGRESSIVE_READ_SUPPORTED
 typedef PNG_CALLBACK(void, *png_progressive_info_ptr, (png_structp, png_infop));
 typedef PNG_CALLBACK(void, *png_progressive_end_ptr, (png_structp, png_infop));
@@ -1886,6 +1890,20 @@ PNG_EXPORT(98, void, png_free_data, (png_const_structrp png_ptr,
  */
 PNG_EXPORT(99, void, png_data_freer, (png_const_structrp png_ptr,
     png_inforp info_ptr, int freer, png_uint_32 mask));
+
+#ifdef PNG_INDEX_SUPPORTED
+/* Build image index for partial image decoding. */
+PNG_EXPORT(300, void, png_build_index, (png_structp png_ptr));
+PNG_EXPORT(301, void, png_configure_decoder,
+    (png_structp png_ptr, int *row_offset, int pass));
+/* Set the data seek function with a user supplied one.
+ * REQUIRED by partial image decode.
+ */
+PNG_EXPORT(302, void, png_set_seek_fn, (png_structp png_ptr,
+   png_seek_ptr seek_data_fn));
+/* Update the decoder status to the given pass */
+PNG_EXPORT(303, void, png_set_interlaced_pass, (png_structp png_ptr, int pass));
+#endif
 
 /* Assignments for png_data_freer */
 #define PNG_DESTROY_WILL_FREE_DATA 1
