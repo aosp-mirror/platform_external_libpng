@@ -24,6 +24,8 @@ ifeq ($(ARCH_ARM_HAVE_NEON),true)
 my_cflags_arm := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
 endif
 
+my_cflags_arm64 := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
+
 # BUG: http://llvm.org/PR19472 - SLP vectorization (on ARM at least) crashes
 # when we can't lower a vectorized bswap.
 my_cflags_arm += -fno-slp-vectorize
@@ -83,6 +85,8 @@ LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
 LOCAL_CFLAGS_arm := $(my_cflags_arm)
 LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_SRC_FILES_arm := $(my_src_files_arm)
+LOCAL_CFLAGS_arm64 := $(my_cflags_arm64)
+LOCAL_SRC_FILES_arm64 := $(my_src_files_arm)
 
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
 	external/zlib
@@ -103,6 +107,8 @@ LOCAL_CFLAGS += $(common_CFLAGS) -ftrapv
 LOCAL_CFLAGS_arm := $(my_cflags_arm)
 LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_SRC_FILES_arm := $(my_src_files_arm)
+LOCAL_CFLAGS_arm64 := $(my_cflags_arm64)
+LOCAL_SRC_FILES_arm64 := $(my_src_files_arm)
 
 LOCAL_C_INCLUDES += $(common_C_INCLUDES) \
 	external/zlib
