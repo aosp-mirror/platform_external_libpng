@@ -21,10 +21,10 @@ common_SRC_FILES := \
 	pngwutil.c \
 
 ifeq ($(ARCH_ARM_HAVE_NEON),true)
-my_cflags_arm := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
+my_cflags_arm := -DPNG_ARM_NEON_OPT=2
 endif
 
-my_cflags_arm64 := -DPNG_ARM_NEON_OPT=2 -DPNG_ARM_NEON_CHECK_SUPPORTED
+my_cflags_arm64 := -DPNG_ARM_NEON_OPT=2
 
 # BUG: http://llvm.org/PR19472 - SLP vectorization (on ARM at least) crashes
 # when we can't lower a vectorized bswap.
