@@ -781,10 +781,10 @@ png_build_index(png_structp png_ptr)
       // has roughly the same size of index.
       // This way, we won't consume to much memory in recording index.
       index->step[p] = INDEX_SAMPLE_SIZE * (8 / number_rows_in_pass[p]);
-      index->size[p] =
+      const int temp_size =
          (png_ptr->height + index->step[p] - 1) / index->step[p];
       index->pass_line_index[p] =
-         png_malloc(png_ptr, index->size[p] * sizeof(png_line_indexp));
+         png_malloc(png_ptr, temp_size * sizeof(png_line_indexp));
 
       // Get the row_byte_length seen by the filter. This value may be
       // different from the row_byte_length of a bitmap in the case of
@@ -793,7 +793,7 @@ png_build_index(png_structp png_ptr)
          PNG_ROWBYTES(png_ptr->pixel_depth, png_ptr->iwidth) + 1;
 
       // Now, we record index for each indexing row.
-      for (i = 0; i < index->size[p]; i++)
+      for (i = 0; i < temp_size; i++)
       {
          png_line_indexp line_index = png_malloc(png_ptr, sizeof(png_line_index));
          index->pass_line_index[p][i] = line_index;
@@ -804,6 +804,11 @@ png_build_index(png_structp png_ptr)
          memcpy(line_index->prev_row, png_ptr->prev_row, row_byte_length);
          line_index->stream_idat_position = index->stream_idat_position;
          line_index->bytes_left_in_idat = png_ptr->idat_size + png_ptr->zstream.avail_in;
+
+         // increment the size now that we have the backing data structures.
+         // This prevents a crash in the event that png_read_row fails and
+         // we need to cleanup the partially constructed png_index_struct;
+         index->size[p] += 1;
 
          // Skip the "step" number of rows to the next indexing row.
          for (j = 0; j < index->step[p] &&
