@@ -2421,6 +2421,17 @@ png_colorspace_set_rgb_coefficients(png_structrp png_ptr)
 
 #endif /* COLORSPACE */
 
+#ifdef __GNUC__
+/* This exists solely to work round a warning from GNU C. */
+static int /* PRIVATE */
+png_gt(size_t a, size_t b)
+{
+    return a > b;
+}
+#else
+#   define png_gt(a,b) ((a) > (b))
+#endif
+
 void /* PRIVATE */
 png_check_IHDR(png_const_structrp png_ptr,
    png_uint_32 width, png_uint_32 height, int bit_depth,
@@ -2435,6 +2446,43 @@ png_check_IHDR(png_const_structrp png_ptr,
       png_warning(png_ptr, "Image width is zero in IHDR");
       error = 1;
    }
+   else if (width > PNG_UINT_31_MAX)
+   {
+      png_warning(png_ptr, "Invalid image width in IHDR");
+      error = 1;
+   }
+
+   else if (png_gt(width,
+                   (PNG_SIZE_MAX >> 3) /* 8-byte RGBA pixels */
+                   - 48                /* big_row_buf hack */
+                   - 1                 /* filter byte */
+                   - 7*8               /* rounding width to multiple of 8 pix */
+                   - 8))               /* extra max_pixel_depth pad */
+   {
+      /* The size of the row must be within the limits of this architecture.
+       * Because the read code can perform arbitrary transformations the
+       * maximum size is checked here.  Because the code in png_read_start_row
+       * adds extra space "for safety's sake" in several places a conservative
+       * limit is used here.
+       *
+       * NOTE: it would be far better to check the size that is actually used,
+       * but the effect in the real world is minor and the changes are more
+       * extensive, therefore much more dangerous and much more difficult to
+       * write in a way that avoids compiler warnings.
+       */
+       png_warning(png_ptr, "Image width is too large for this architecture");
+       error = 1;
+   }
+
+#  ifdef PNG_SET_USER_LIMITS_SUPPORTED
+   else if (width > png_ptr->user_width_max)
+#  else
+   else if (width > PNG_USER_WIDTH_MAX)
+#  endif
+   {
+      png_warning(png_ptr, "Image width exceeds user limit in IHDR");
+      error = 1;
+   }
 
    if (height == 0)
    {
@@ -2442,16 +2490,6 @@ png_check_IHDR(png_const_structrp png_ptr,
       error = 1;
    }
 
-#  ifdef PNG_SET_USER_LIMITS_SUPPORTED
-   if (width > png_ptr->user_width_max)
-
-#  else
-   if (width > PNG_USER_WIDTH_MAX)
-#  endif
-   {
-      png_warning(png_ptr, "Image width exceeds user limit in IHDR");
-      error = 1;
-   }
 
 #  ifdef PNG_SET_USER_LIMITS_SUPPORTED
    if (height > png_ptr->user_height_max)
@@ -2463,11 +2501,6 @@ png_check_IHDR(png_const_structrp png_ptr,
       error = 1;
    }
 
-   if (width > PNG_UINT_31_MAX)
-   {
-      png_warning(png_ptr, "Invalid image width in IHDR");
-      error = 1;
-   }
 
    if (height > PNG_UINT_31_MAX)
    {
