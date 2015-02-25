@@ -38,15 +38,6 @@ my_src_files_arm := \
 
 common_CFLAGS := -std=gnu89 #-fvisibility=hidden ## -fomit-frame-pointer
 
-ifeq ($(HOST_OS),windows)
-	ifeq ($(USE_MINGW),)
-#		Case where we're building windows but not under linux (so it must be cygwin)
-#		In this case, gcc cygwin doesn't recognize -fvisibility=hidden
-		$(info libpng: Ignoring gcc flag $(common_CFLAGS) on Cygwin)
-	common_CFLAGS :=
-	endif
-endif
-
 # For the host
 # =====================================================
 
@@ -55,6 +46,7 @@ LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
 LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)
+LOCAL_STATIC_LIBRARIES := libz
 LOCAL_MODULE:= libpng
 include $(BUILD_HOST_STATIC_LIBRARY)
 
