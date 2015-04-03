@@ -1000,8 +1000,7 @@ png_build_index(png_structp png_ptr)
       number_rows_in_pass[0] = 8;
    }
 
-   // Allocate a buffer big enough for any transform.
-   rp = png_malloc(png_ptr, PNG_ROWBYTES(png_ptr->maximum_pixel_depth, png_ptr->width));
+   rp = png_malloc(png_ptr, png_ptr->rowbytes);
 
    png_indexp index = png_malloc(png_ptr, sizeof(png_index));
    png_ptr->index = index;
@@ -1019,7 +1018,7 @@ png_build_index(png_structp png_ptr)
       // has roughly the same size of index.
       // This way, we won't consume to much memory in recording index.
       index->step[p] = INDEX_SAMPLE_SIZE * (8 / number_rows_in_pass[p]);
-      const png_uint_32 temp_size =
+      const int temp_size =
          (png_ptr->height + index->step[p] - 1) / index->step[p];
       index->pass_line_index[p] =
          png_malloc(png_ptr, temp_size * sizeof(png_line_indexp));
