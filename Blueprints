@@ -1,0 +1,84 @@
+// We need to build this for both the device (as a shared library)
+// and the host (as a static library for tools to use).
+
+// ANDROIDMK TRANSLATION ERROR: unsupported conditional
+// ifeq ($(ARCH_ARM_HAVE_NEON),true)
+cflags_arm = ["-DPNG_ARM_NEON_OPT=2"]
+// ANDROIDMK TRANSLATION ERROR: endif from unsupported contitional
+// endif
+cflags_arm64 = ["-DPNG_ARM_NEON_OPT=2"]
+
+// BUG: http://llvm.org/PR19472 - SLP vectorization (on ARM at least) crashes
+// when we can't lower a vectorized bswap.
+cflags_arm += ["-fno-slp-vectorize"]
+
+src_files_arm = [
+    "arm/arm_init.c",
+    "arm/filter_neon.S",
+    "arm/filter_neon_intrinsics.c",
+]
+
+cc_library {
+    name: "libpng",
+    host_supported: true,
+    srcs: [
+        "png.c",
+        "pngerror.c",
+        "pngget.c",
+        "pngmem.c",
+        "pngpread.c",
+        "pngread.c",
+        "pngrio.c",
+        "pngrtran.c",
+        "pngrutil.c",
+        "pngset.c",
+        "pngtrans.c",
+        "pngwio.c",
+        "pngwrite.c",
+        "pngwtran.c",
+        "pngwutil.c",
+    ],
+    clang: true,
+    cflags: [
+        "-std=gnu89",
+        //"-fvisibility=hidden",
+        //"-fomit-frame-pointer",
+    ],
+    asan: false,
+    export_include_dirs: ["."],
+
+    target: {
+        host: {
+            static_libs: ["libz"],
+        },
+        android: {
+            cflags: ["-ftrapv"],
+            shared_libs: ["libz"],
+        }
+    },
+
+    arch: {
+        arm: {
+            srcs: src_files_arm,
+            cflags: cflags_arm,
+        },
+        arm64: {
+            srcs: src_files_arm,
+            cflags: cflags_arm64,
+        }
+    }
+}
+
+// For testing
+// =====================================================
+
+cc_binary {
+    clang: true,
+    srcs: ["pngtest.c"],
+    name: "pngtest",
+    shared_libs: [
+        "libpng",
+        "libz",
+    ],
+    tags: ["debug"],
+}
