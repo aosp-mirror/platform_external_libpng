@@ -1775,11 +1775,14 @@ png_write_start_row(png_structp png_ptr)
 #endif
 
    png_size_t buf_size;
+   int usr_pixel_depth;
 
    png_debug(1, "in png_write_start_row");
 
-   buf_size = (png_size_t)(PNG_ROWBYTES(
-      png_ptr->usr_channels*png_ptr->usr_bit_depth, png_ptr->width) + 1);
+   usr_pixel_depth = png_ptr->usr_channels * png_ptr->usr_bit_depth;
+
+   buf_size = (png_size_t)(PNG_ROWBYTES(usr_pixel_depth, png_ptr->width) + 1);
+   png_ptr->maximum_pixel_depth = (png_byte)usr_pixel_depth;
 
    /* Set up row buffer */
    png_ptr->row_buf = (png_bytep)png_malloc(png_ptr,

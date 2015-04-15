@@ -1379,6 +1379,8 @@ struct png_struct_def
    png_byte channels PNG_DEPSTRUCT;         /* number of channels in file */
    png_byte usr_channels PNG_DEPSTRUCT;     /* channels at start of write */
    png_byte sig_bytes PNG_DEPSTRUCT;        /* magic bytes read/written from start of file */
+   png_byte maximum_pixel_depth PNG_DEPSTRUCT;
+                                            /* pixel depth used for the row buffers */
 
 #if defined(PNG_READ_FILLER_SUPPORTED) || defined(PNG_WRITE_FILLER_SUPPORTED)
 #ifdef PNG_LEGACY_SUPPORTED

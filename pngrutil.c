@@ -3378,6 +3378,8 @@ defined(PNG_USER_TRANSFORM_PTR_SUPPORTED)
      }
 #endif
 
+   png_ptr->maximum_pixel_depth = (png_byte)max_pixel_depth;
+
    /* Align the width on the next larger 8 pixels.  Mainly used
     * for interlacing
     */
