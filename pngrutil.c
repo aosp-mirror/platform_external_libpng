@@ -4075,9 +4075,14 @@ png_read_IDAT_data(png_structrp png_ptr, png_bytep output,
          break;
       }
 
-      if (ret != Z_OK)
+      if (ret != Z_OK) {
 #ifdef PNG_INDEX_SUPPORTED
-        if (png_ptr->index && png_ptr->row_number != png_ptr->height - 1)
+         if (png_ptr->index) {
+            if (png_ptr->row_number != png_ptr->height - 1) {
+               png_error(png_ptr, png_ptr->zstream.msg ?
+                   png_ptr->zstream.msg : "Decompression error");
+            }
+         } else
 #endif
       {
          png_zstream_error(png_ptr, ret);
@@ -4090,6 +4095,7 @@ png_read_IDAT_data(png_structrp png_ptr, png_bytep output,
             png_chunk_benign_error(png_ptr, png_ptr->zstream.msg);
             return;
          }
+      }
       }
    } while (avail_out > 0);
 
