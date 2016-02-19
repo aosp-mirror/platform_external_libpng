@@ -1,4 +1,4 @@
-Any Android specific modifications to upstream libpng (1.6.19) should
+Any Android specific modifications to upstream libpng (1.6.22beta) should
 be listed here:
 
 (1) Android has added the following files.
