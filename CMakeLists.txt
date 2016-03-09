@@ -88,6 +88,9 @@ set(libpng_sources
   pngwrite.c
   pngwtran.c
   pngwutil.c
+  arm/arm_init.c
+  arm/filter_neon.S
+  arm/filter_neon_intrinsics.c
 )
 set(pngtest_sources
   pngtest.c
@@ -371,4 +374,3 @@ endif()
 # to create msvc import lib for mingw compiled shared lib
 # pexports libpng.dll > libpng.def
 # lib /def:libpng.def /machine:x86
-
