@@ -22,7 +22,7 @@ common_SRC_FILES := \
 	pngwtran.c \
 	pngwutil.c
 
-common_CFLAGS := -std=gnu89 -fvisibility=hidden ## -fomit-frame-pointer
+common_CFLAGS := -std=gnu89 #-fvisibility=hidden ## -fomit-frame-pointer
 
 ifeq ($(HOST_OS),windows)
   ifeq ($(USE_MINGW),)
@@ -36,7 +36,7 @@ endif
 common_C_INCLUDES += 
 
 common_COPY_HEADERS_TO := libpng
-common_COPY_HEADERS := png.h pngconf.h pngusr.h
+common_COPY_HEADERS := png.h pngconf.h pnglibconf.h pngusr.h
 
 # For the host
 # =====================================================
