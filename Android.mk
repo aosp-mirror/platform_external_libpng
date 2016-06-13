@@ -47,8 +47,11 @@ LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_SRC_FILES_x86 += $(my_src_files_intel)
 LOCAL_SRC_FILES_x86_64 += $(my_src_files_intel)
 LOCAL_CFLAGS += $(common_CFLAGS)
-LOCAL_CFLAGS_x86 += $(my_cflags_intel)
-LOCAL_CFLAGS_x86_64 += $(my_cflags_intel)
+
+# Disable optimizations because they crash on windows
+# LOCAL_CFLAGS_x86 += $(my_cflags_intel)
+# LOCAL_CFLAGS_x86_64 += $(my_cflags_intel)
+
 LOCAL_ASFLAGS += $(common_ASFLAGS)
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)
 LOCAL_STATIC_LIBRARIES := libz
