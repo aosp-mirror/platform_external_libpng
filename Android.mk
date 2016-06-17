@@ -37,7 +37,7 @@ my_src_files_intel := \
     contrib/intel/intel_init.c \
     contrib/intel/filter_sse2_intrinsics.c
 
-common_CFLAGS := -std=gnu89 -Wno-unused-parameter #-fvisibility=hidden ## -fomit-frame-pointer
+common_CFLAGS := -std=gnu89 -Wno-unused-parameter
 
 # For the host
 # =====================================================
