@@ -32,7 +32,7 @@ my_src_files_arm := \
 			arm/filter_neon_intrinsics.c
 
 
-common_CFLAGS := -std=gnu89 #-fvisibility=hidden ## -fomit-frame-pointer
+common_CFLAGS := -std=gnu89 -Wno-unused-parameter
 
 # For the host
 # =====================================================
