@@ -21,3 +21,7 @@ be listed here:
     in contrib/intel/intel_sse.patch.
     The patch was applied using the following command:
     'patch -i contrib/intel/intel_sse.patch -p1'
+
+(5) Revert ADLER32 error handling to fix the infinite loop
+Cherry picked from upstream:
+https://github.com/glennrp/libpng/commit/d65a92b951079d315e17e20ba9e7b8423d19397e
