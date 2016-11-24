@@ -4101,7 +4101,15 @@ png_read_IDAT_data(png_structrp png_ptr, png_bytep output,
          png_zstream_error(png_ptr, ret);
 
          if (output != NULL)
-            png_chunk_error(png_ptr, png_ptr->zstream.msg);
+         {
+            if(!strncmp(png_ptr->zstream.msg,"incorrect data check",20))
+            {
+               png_chunk_benign_error(png_ptr, "ADLER32 checksum mismatch");
+               continue;
+            }
+            else
+               png_chunk_error(png_ptr, png_ptr->zstream.msg);
+         }
 
          else /* checking */
          {
