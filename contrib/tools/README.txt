@@ -23,5 +23,4 @@ ORIGINAL AUTHORS
     of the people below claim any rights with regard to the contents of this
     directory.
 
-    John Bowler <jbowler at acm.org>
-    Glenn Randers-Pehrson <glennrp at users.sourceforge.net>
+    John Bowler <jbowler@acm.org>
