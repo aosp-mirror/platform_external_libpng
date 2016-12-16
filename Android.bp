@@ -85,11 +85,6 @@ cc_library {
         windows: {
             enabled: true,
         },
-        android: {
-            sanitize: {
-                never: true,
-            },
-        },
     },
 }
 
@@ -101,9 +96,6 @@ cc_library_static {
     defaults: ["libpng-defaults"],
     cflags: ["-ftrapv"],
 
-    sanitize: {
-        never: true,
-    },
     shared_libs: ["libz"],
     sdk_version: "14",
 }
