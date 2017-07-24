@@ -80,6 +80,9 @@ cc_defaults {
 cc_library {
     name: "libpng",
     vendor_available: true,
+    vndk: {
+        enabled: true,
+    },
     host_supported: true,
     defaults: ["libpng-defaults"],
     target: {
