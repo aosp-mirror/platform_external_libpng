@@ -71,7 +71,6 @@ cc_defaults {
         },
     },
     export_include_dirs: ["."],
-    clang: true,
 }
 
 // For the host and device platform
@@ -105,7 +104,6 @@ cc_library_static {
 // =====================================================
 
 cc_test {
-    clang: true,
     host_supported: true,
     gtest: false,
     srcs: ["pngtest.c"],
