@@ -56,18 +56,13 @@ cc_defaults {
             // cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
     },
+    shared_libs: ["libz"],
     target: {
-        android: {
-            shared_libs: ["libz"],
-        },
         android_x86: {
             cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
         android_x86_64: {
             cflags: ["-DPNG_INTEL_SSE_OPT=1"],
-        },
-        host: {
-            shared_libs: ["libz-host"],
         },
     },
     export_include_dirs: ["."],
@@ -113,13 +108,6 @@ cc_test {
     name: "pngtest",
     shared_libs: [
         "libpng",
+        "libz",
     ],
-    target: {
-        android: {
-            shared_libs: ["libz"],
-        },
-        host: {
-            shared_libs: ["libz-host"],
-        },
-    },
 }
