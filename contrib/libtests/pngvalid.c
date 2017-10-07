@@ -1,9 +1,8 @@
 
 /* pngvalid.c - validate libpng by constructing then reading png files.
  *
- * Last changed in libpng 1.6.24 [August 4, 2016]
- * Copyright (c) 2014-2016 Glenn Randers-Pehrson
- * Written by John Cunningham Bowler
+ * Last changed in libpng 1.6.31 [July 27, 2017]
+ * Copyright (c) 2014-2017 John Cunningham Bowler
  *
  * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
@@ -1242,7 +1241,7 @@ store_image_check(const png_store* ps, png_const_structp pp, int iImage)
 
       image += 2; /* skip image first row markers */
 
-      while (rows-- > 0)
+      for (; rows > 0; --rows)
       {
          if (image[-2] != 190 || image[-1] != 239)
             png_error(pp, "row start overwritten");
@@ -4011,8 +4010,11 @@ check_interlace_type(int const interlace_type)
 #  define do_own_interlace 1
 #endif /* WRITE_INTERLACING tests */
 
-#define CAN_WRITE_INTERLACE\
-   PNG_LIBPNG_VER >= 10700 || defined PNG_WRITE_INTERLACING_SUPPORTED
+#if PNG_LIBPNG_VER >= 10700 || defined PNG_WRITE_INTERLACING_SUPPORTED
+#   define CAN_WRITE_INTERLACE 1
+#else
+#   define CAN_WRITE_INTERLACE 0
+#endif
 
 /* Do the same thing for read interlacing; this controls whether read tests do
  * their own de-interlace or use libpng.
@@ -6582,16 +6584,16 @@ transform_info_imp(transform_display *dp, png_structp pp, png_infop pi)
    {
    case PNG_COLOR_TYPE_PALETTE:
       if (dp->output_bit_depth > 8) goto error;
-      /*FALL THROUGH*/
+      /* FALLTHROUGH */
    case PNG_COLOR_TYPE_GRAY:
       if (dp->output_bit_depth == 1 || dp->output_bit_depth == 2 ||
          dp->output_bit_depth == 4)
          break;
-      /*FALL THROUGH*/
+      /* FALLTHROUGH */
    default:
       if (dp->output_bit_depth == 8 || dp->output_bit_depth == 16)
          break;
-      /*FALL THROUGH*/
+      /* FALLTHROUGH */
    error:
       {
          char message[128];
@@ -7740,13 +7742,11 @@ image_transform_png_set_rgb_to_gray_ini(const image_transform *this,
           * NOTE: this number only affects the internal limit check in pngvalid,
           * it has no effect on the limits applied to the libpng values.
           */
-         that->pm->limit += pow(
-#        if DIGITIZE
-            2.0
-#        else
-            1.0
-#        endif
-            /255, data.gamma);
+#if DIGITIZE
+          that->pm->limit += pow( 2.0/255, data.gamma);
+#else
+          that->pm->limit += pow( 1.0/255, data.gamma);
+#endif
       }
    }
 
@@ -9994,9 +9994,9 @@ gamma_component_validate(const char *name, const validate_info *vi,
                case PNG_BACKGROUND_GAMMA_FILE:
                case PNG_BACKGROUND_GAMMA_UNIQUE:
                   use_background = (alpha >= 0 && alpha < 1);
-                  /*FALL THROUGH*/
 #           endif
 #           ifdef PNG_READ_ALPHA_MODE_SUPPORTED
+               /* FALLTHROUGH */
                case ALPHA_MODE_OFFSET + PNG_ALPHA_STANDARD:
                case ALPHA_MODE_OFFSET + PNG_ALPHA_BROKEN:
                case ALPHA_MODE_OFFSET + PNG_ALPHA_OPTIMIZED:
@@ -11427,23 +11427,36 @@ perform_interlace_macro_validation(void)
        */
       for (v=0;;)
       {
+         /* The first two tests overflow if the pass row or column is outside
+          * the possible range for a 32-bit result.  In fact the values should
+          * never be outside the range for a 31-bit result, but checking for 32
+          * bits here ensures that if an app uses a bogus pass row or column
+          * (just so long as it fits in a 32 bit integer) it won't get a
+          * possibly dangerous overflow.
+          */
          /* First the base 0 stuff: */
-         m = PNG_ROW_FROM_PASS_ROW(v, pass);
-         f = png_row_from_pass_row(v, pass);
-         if (m != f)
+         if (v < png_pass_rows(0xFFFFFFFFU, pass))
          {
-            fprintf(stderr, "PNG_ROW_FROM_PASS_ROW(%u, %d) = %u != %x\n",
-               v, pass, m, f);
-            exit(99);
+            m = PNG_ROW_FROM_PASS_ROW(v, pass);
+            f = png_row_from_pass_row(v, pass);
+            if (m != f)
+            {
+               fprintf(stderr, "PNG_ROW_FROM_PASS_ROW(%u, %d) = %u != %x\n",
+                  v, pass, m, f);
+               exit(99);
+            }
          }
 
-         m = PNG_COL_FROM_PASS_COL(v, pass);
-         f = png_col_from_pass_col(v, pass);
-         if (m != f)
+         if (v < png_pass_cols(0xFFFFFFFFU, pass))
          {
-            fprintf(stderr, "PNG_COL_FROM_PASS_COL(%u, %d) = %u != %x\n",
-               v, pass, m, f);
-            exit(99);
+            m = PNG_COL_FROM_PASS_COL(v, pass);
+            f = png_col_from_pass_col(v, pass);
+            if (m != f)
+            {
+               fprintf(stderr, "PNG_COL_FROM_PASS_COL(%u, %d) = %u != %x\n",
+                  v, pass, m, f);
+               exit(99);
+            }
          }
 
          m = PNG_ROW_IN_INTERLACE_PASS(v, pass);
