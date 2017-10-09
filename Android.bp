@@ -22,6 +22,8 @@ cc_defaults {
     ],
     cflags: [
         "-std=gnu89",
+        "-Wall",
+        "-Werror",
         "-Wno-unused-parameter",
     ],
     arch: {
@@ -106,6 +108,7 @@ cc_test {
     gtest: false,
     srcs: ["pngtest.c"],
     name: "pngtest",
+    cflags: ["-Wall", "-Werror"],
     shared_libs: [
         "libpng",
         "libz",
