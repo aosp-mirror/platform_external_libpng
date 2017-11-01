@@ -22,6 +22,8 @@ cc_defaults {
     ],
     cflags: [
         "-std=gnu89",
+        "-Wall",
+        "-Werror",
         "-Wno-unused-parameter",
     ],
     arch: {
@@ -41,37 +43,31 @@ cc_defaults {
         },
         x86: {
             srcs: [
-                "contrib/intel/intel_init.c",
-                "contrib/intel/filter_sse2_intrinsics.c",
+                "intel/intel_init.c",
+                "intel/filter_sse2_intrinsics.c",
             ],
             // Disable optimizations because they crash on windows
             // cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
         x86_64: {
             srcs: [
-                "contrib/intel/intel_init.c",
-                "contrib/intel/filter_sse2_intrinsics.c",
+                "intel/intel_init.c",
+                "intel/filter_sse2_intrinsics.c",
             ],
             // Disable optimizations because they crash on windows
             // cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
     },
+    shared_libs: ["libz"],
     target: {
-        android: {
-            shared_libs: ["libz"],
-        },
         android_x86: {
             cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
         android_x86_64: {
             cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
-        host: {
-            shared_libs: ["libz-host"],
-        },
     },
     export_include_dirs: ["."],
-    clang: true,
 }
 
 // For the host and device platform
@@ -79,6 +75,10 @@ cc_defaults {
 
 cc_library {
     name: "libpng",
+    vendor_available: true,
+    vndk: {
+        enabled: true,
+    },
     host_supported: true,
     defaults: ["libpng-defaults"],
     target: {
@@ -104,20 +104,13 @@ cc_library_static {
 // =====================================================
 
 cc_test {
-    clang: true,
     host_supported: true,
     gtest: false,
     srcs: ["pngtest.c"],
     name: "pngtest",
+    cflags: ["-Wall", "-Werror"],
     shared_libs: [
         "libpng",
+        "libz",
     ],
-    target: {
-        android: {
-            shared_libs: ["libz"],
-        },
-        host: {
-            shared_libs: ["libz-host"],
-        },
-    },
 }
