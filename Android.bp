@@ -76,6 +76,7 @@ cc_defaults {
 cc_library {
     name: "libpng",
     vendor_available: true,
+    recovery_available: true,
     vndk: {
         enabled: true,
     },
