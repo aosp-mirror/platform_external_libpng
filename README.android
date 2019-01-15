@@ -10,4 +10,5 @@ be listed here:
 
 (2) pnglibconf.h
     This is copied from scripts/pnglibconf.h.prebuilt.
-    Android has undefined PNG_WARNINGS_SUPPORTED.
+    Android has undefined PNG_WARNINGS_SUPPORTED and
+    PNG_READ_OPT_PLTE_SUPPORTED.
