@@ -1,0 +1,14 @@
+name: "libpng"
+description: "libpng is a PNG image codec."
+third_party {
+  url {
+    type: GIT
+    value: "https://github.com/glennrp/libpng.git"
+  }
+  version: "v1.6.34"
+  last_upgrade_date {
+    year: 2017
+    month: 10
+    day: 6
+  }
+}
