@@ -3,23 +3,11 @@
 
 cc_defaults {
     name: "libpng-defaults",
-    srcs: [
-        "png.c",
-        "pngerror.c",
-        "pngget.c",
-        "pngmem.c",
-        "pngpread.c",
-        "pngread.c",
-        "pngrio.c",
-        "pngrtran.c",
-        "pngrutil.c",
-        "pngset.c",
-        "pngtrans.c",
-        "pngwio.c",
-        "pngwrite.c",
-        "pngwtran.c",
-        "pngwutil.c",
+    exclude_srcs: [
+        "example.c",
+        "pngtest.c",
     ],
+    srcs: ["*.c"],
     cflags: [
         "-std=gnu89",
         "-Wall",
@@ -28,32 +16,18 @@ cc_defaults {
     ],
     arch: {
         arm: {
-            srcs: [
-                "arm/arm_init.c",
-                "arm/filter_neon.S",
-                "arm/filter_neon_intrinsics.c",
-            ],
+            srcs: ["arm/*"],
         },
         arm64: {
-            srcs: [
-                "arm/arm_init.c",
-                "arm/filter_neon.S",
-                "arm/filter_neon_intrinsics.c",
-            ],
+            srcs: ["arm/*",],
         },
         x86: {
-            srcs: [
-                "intel/intel_init.c",
-                "intel/filter_sse2_intrinsics.c",
-            ],
+            srcs: ["intel/*"],
             // Disable optimizations because they crash on windows
             // cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
         x86_64: {
-            srcs: [
-                "intel/intel_init.c",
-                "intel/filter_sse2_intrinsics.c",
-            ],
+            srcs: ["intel/*"],
             // Disable optimizations because they crash on windows
             // cflags: ["-DPNG_INTEL_SSE_OPT=1"],
         },
