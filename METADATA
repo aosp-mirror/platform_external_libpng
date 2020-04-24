@@ -6,6 +6,7 @@ third_party {
     value: "https://github.com/glennrp/libpng.git"
   }
   version: "v1.6.37"
+  license_type: NOTICE
   last_upgrade_date {
     year: 2019
     month: 6
