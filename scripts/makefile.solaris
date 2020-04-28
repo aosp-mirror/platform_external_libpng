@@ -44,7 +44,8 @@ WARNMORE=-Wwrite-strings -Wpointer-arith -Wshadow \
 	-Wmissing-declarations -Wtraditional -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes #-Wconversion
 CPPFLAGS=-I$(ZLIBINC) # -DPNG_DEBUG=5
-CFLAGS=-W -Wall -O # $(WARNMORE) -g
+CFLAGS= -W -Wall -O \
+	# $(WARNMORE) -g -DPNG_DEBUG=5
 LDFLAGS=-L. -R. -L$(ZLIBLIB) -R$(ZLIBLIB) -lpng16 -lz -lm
 
 INCPATH=$(prefix)/include
@@ -218,7 +219,7 @@ clean:
 	libpng-config $(LIBSO) $(LIBSOMAJ)* \
 	libpng.pc pnglibconf.h
 
-DOCS = ANNOUNCE CHANGES INSTALL KNOWNBUG LICENSE README TODO
+DOCS = ANNOUNCE CHANGES INSTALL KNOWNBUG LICENSE README TODO Y2KINFO
 writelock:
 	chmod a-w *.[ch35] $(DOCS) scripts/*
 

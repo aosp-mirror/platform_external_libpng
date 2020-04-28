@@ -661,7 +661,7 @@ generate_row(png_bytep row, size_t rowbytes, unsigned int y, int color_type,
       {
          case 1:
             {
-               png_uint_32 luma = colors[1];
+               const png_uint_32 luma = colors[1];
                png_uint_32 x;
 
                for (x=0; x<=size_max; ++x)
@@ -672,8 +672,8 @@ generate_row(png_bytep row, size_t rowbytes, unsigned int y, int color_type,
 
          case 2:
             {
-               png_uint_32 luma = colors[1];
-               png_uint_32 alpha = colors[2];
+               const png_uint_32 luma = colors[1];
+               const png_uint_32 alpha = colors[2];
                png_uint_32 x;
 
                for (x=0; x<size_max; ++x)
@@ -688,9 +688,9 @@ generate_row(png_bytep row, size_t rowbytes, unsigned int y, int color_type,
 
          case 3:
             {
-               png_uint_32 red = colors[1];
-               png_uint_32 green = colors[2];
-               png_uint_32 blue = colors[3];
+               const png_uint_32 red = colors[1];
+               const png_uint_32 green = colors[2];
+               const png_uint_32 blue = colors[3];
                png_uint_32 x;
 
                for (x=0; x<=size_max; ++x)
@@ -707,10 +707,10 @@ generate_row(png_bytep row, size_t rowbytes, unsigned int y, int color_type,
 
          case 4:
             {
-               png_uint_32 red = colors[1];
-               png_uint_32 green = colors[2];
-               png_uint_32 blue = colors[3];
-               png_uint_32 alpha = colors[4];
+               const png_uint_32 red = colors[1];
+               const png_uint_32 green = colors[2];
+               const png_uint_32 blue = colors[3];
+               const png_uint_32 alpha = colors[4];
                png_uint_32 x;
 
                for (x=0; x<=size_max; ++x)
@@ -812,7 +812,7 @@ write_png(const char **name, FILE *fp, int color_type, int bit_depth,
       png_error(png_ptr, "OOM allocating info structure");
 
    {
-      unsigned int size =
+      const unsigned int size =
          image_size_of_type(color_type, bit_depth, colors, small);
       unsigned int ysize;
       png_fixed_point real_gamma = 45455; /* For sRGB */
@@ -824,7 +824,7 @@ write_png(const char **name, FILE *fp, int color_type, int bit_depth,
        */
       if (small)
       {
-         unsigned int pixel_depth =
+         const unsigned int pixel_depth =
             pixel_depth_of_type(color_type, bit_depth);
 
          if (pixel_depth <= 8U)
@@ -950,7 +950,7 @@ write_png(const char **name, FILE *fp, int color_type, int bit_depth,
             int passes = 1;
 #        endif /* !WRITE_INTERLACING */
          int pass;
-         size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+         png_size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
 
          row = malloc(rowbytes);
 
@@ -1094,7 +1094,7 @@ load_file(png_const_charp name, png_bytepp result)
    return 0;
 }
 
-static size_t
+static png_size_t
 load_fake(png_charp param, png_bytepp profile)
 {
    char *endptr = NULL;
@@ -1164,7 +1164,7 @@ insert_iCCP(png_structp png_ptr, png_infop info_ptr, int nparams,
    {
       case '<':
          {
-            size_t filelen = load_file(params[1]+1, &profile);
+            png_size_t filelen = load_file(params[1]+1, &profile);
             if (filelen > 0xfffffffc) /* Maximum profile length */
             {
                fprintf(stderr, "%s: file too long (%lu) for an ICC profile\n",
@@ -1179,7 +1179,7 @@ insert_iCCP(png_structp png_ptr, png_infop info_ptr, int nparams,
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
          {
-            size_t fake_len = load_fake(params[1], &profile);
+            png_size_t fake_len = load_fake(params[1], &profile);
 
             if (fake_len > 0) /* else a simple parameter */
             {
@@ -1274,7 +1274,7 @@ set_text(png_structp png_ptr, png_infop info_ptr, png_textp text,
       case '5': case '6': case '7': case '8': case '9':
          {
             png_bytep data = NULL;
-            size_t fake_len = load_fake(param, &data);
+            png_size_t fake_len = load_fake(param, &data);
 
             if (fake_len > 0) /* else a simple parameter */
             {
@@ -1378,10 +1378,10 @@ static void
 insert_sBIT(png_structp png_ptr, png_infop info_ptr, int nparams,
       png_charpp params)
 {
-   int ct = png_get_color_type(png_ptr, info_ptr);
-   int c = (ct & PNG_COLOR_MASK_COLOR ? 3 : 1) +
+   const int ct = png_get_color_type(png_ptr, info_ptr);
+   const int c = (ct & PNG_COLOR_MASK_COLOR ? 3 : 1) +
       (ct & PNG_COLOR_MASK_ALPHA ? 1 : 0);
-   unsigned int maxval =
+   const unsigned int maxval =
       ct & PNG_COLOR_MASK_PALETTE ? 8U : png_get_bit_depth(png_ptr, info_ptr);
    png_color_8 sBIT;
 
@@ -1856,7 +1856,7 @@ main(int argc, char **argv)
 
    /* Check the colors */
    {
-      unsigned int lim = (color_type == PNG_COLOR_TYPE_PALETTE ? 255U :
+      const unsigned int lim = (color_type == PNG_COLOR_TYPE_PALETTE ? 255U :
          (1U<<bit_depth)-1);
       unsigned int i;
 
