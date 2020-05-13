@@ -73,7 +73,7 @@ cc_library_static {
     cflags: ["-ftrapv"],
 
     shared_libs: ["libz"],
-    sdk_version: "14",
+    sdk_version: "minimum",
 }
 
 // For testing
