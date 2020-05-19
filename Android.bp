@@ -17,9 +17,11 @@ cc_defaults {
     arch: {
         arm: {
             srcs: ["arm/*"],
+            cflags: ["-O3"],
         },
         arm64: {
             srcs: ["arm/*",],
+            cflags: ["-O3"],
         },
         x86: {
             srcs: ["intel/*"],
