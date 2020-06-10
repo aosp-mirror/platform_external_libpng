@@ -17,9 +17,11 @@ cc_defaults {
     arch: {
         arm: {
             srcs: ["arm/*"],
+            cflags: ["-O3"],
         },
         arm64: {
             srcs: ["arm/*",],
+            cflags: ["-O3"],
         },
         x86: {
             srcs: ["intel/*"],
@@ -73,7 +75,7 @@ cc_library_static {
     cflags: ["-ftrapv"],
 
     shared_libs: ["libz"],
-    sdk_version: "14",
+    sdk_version: "minimum",
 }
 
 // For testing
