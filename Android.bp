@@ -52,6 +52,8 @@ cc_defaults {
 cc_library {
     name: "libpng",
     vendor_available: true,
+    // TODO(b/153609531): remove when no longer needed.
+    native_bridge_supported: true,
     recovery_available: true,
     vndk: {
         enabled: true,
