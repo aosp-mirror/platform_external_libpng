@@ -94,3 +94,28 @@ cc_test {
         "libz",
     ],
 }
+
+cc_fuzz {
+    name: "libpng_read_fuzzer",
+    host_supported:true,
+
+    static_libs: [
+        "libpng",
+        "libz",
+    ],
+
+    srcs: [
+        "contrib/oss-fuzz/libpng_read_fuzzer.cc",
+    ],
+
+    dictionary: "contrib/oss-fuzz/png.dict",
+
+    corpus: ["contrib/testpngs/*.png"],
+
+    fuzz_config: {
+        cc: [
+            "scroggo@google.com",
+        ],
+        componentid: 87896,
+    },
+}
