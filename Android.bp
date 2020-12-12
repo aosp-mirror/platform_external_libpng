@@ -22,6 +22,9 @@ cc_defaults {
         arm64: {
             srcs: ["arm/*",],
             cflags: ["-O3"],
+            exclude_srcs: [
+                "arm/filter_neon.S"
+            ],
         },
         x86: {
             srcs: ["intel/*"],
