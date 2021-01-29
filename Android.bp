@@ -22,6 +22,9 @@ cc_defaults {
         arm64: {
             srcs: ["arm/*",],
             cflags: ["-O3"],
+            exclude_srcs: [
+                "arm/filter_neon.S"
+            ],
         },
         x86: {
             srcs: ["intel/*"],
@@ -52,6 +55,7 @@ cc_defaults {
 cc_library {
     name: "libpng",
     vendor_available: true,
+    product_available: true,
     // TODO(b/153609531): remove when no longer needed.
     native_bridge_supported: true,
     recovery_available: true,
@@ -93,4 +97,29 @@ cc_test {
         "libpng",
         "libz",
     ],
+}
+
+cc_fuzz {
+    name: "libpng_read_fuzzer",
+    host_supported:true,
+
+    static_libs: [
+        "libpng",
+        "libz",
+    ],
+
+    srcs: [
+        "contrib/oss-fuzz/libpng_read_fuzzer.cc",
+    ],
+
+    dictionary: "contrib/oss-fuzz/png.dict",
+
+    corpus: ["contrib/testpngs/*.png"],
+
+    fuzz_config: {
+        cc: [
+            "scroggo@google.com",
+        ],
+        componentid: 87896,
+    },
 }
