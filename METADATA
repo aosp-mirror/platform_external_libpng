@@ -12,7 +12,4 @@ third_party {
     month: 6
     day: 10
   }
-  security {
-      tag: "NVD-CPE2.3:cpe:/a:libpng:libpng:1.6.37"
-  }
 }
