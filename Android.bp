@@ -100,9 +100,6 @@ cc_library {
     // TODO(b/153609531): remove when no longer needed.
     native_bridge_supported: true,
     recovery_available: true,
-    vndk: {
-        enabled: true,
-    },
     double_loadable: true,
     host_supported: true,
     defaults: ["libpng-defaults"],
