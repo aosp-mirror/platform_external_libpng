@@ -1,6 +1,6 @@
-.TH LIBPNG 3 "June 21, 2023"
+.TH LIBPNG 3 "November 20, 2022"
 .SH NAME
-libpng \- Portable Network Graphics (PNG) Reference Library 1.6.40
+libpng \- Portable Network Graphics (PNG) Reference Library 1.6.39
 
 .SH SYNOPSIS
 \fB#include <png.h>\fP
@@ -519,7 +519,7 @@ Following is a copy of the libpng-manual.txt file that accompanies libpng.
 .SH LIBPNG.TXT
 libpng-manual.txt - A description on how to use and modify libpng
 
- Copyright (c) 2018-2023 Cosmin Truta
+ Copyright (c) 2018-2022 Cosmin Truta
  Copyright (c) 1998-2018 Glenn Randers-Pehrson
 
  This document is released under the libpng license.
@@ -528,9 +528,9 @@ libpng-manual.txt - A description on how to use and modify libpng
 
  Based on:
 
- libpng version 1.6.36, December 2018, through 1.6.40 - June 2023
+ libpng version 1.6.36, December 2018, through 1.6.39 - November 2022
  Updated and distributed by Cosmin Truta
- Copyright (c) 2018-2023 Cosmin Truta
+ Copyright (c) 2018-2022 Cosmin Truta
 
  libpng versions 0.97, January 1998, through 1.6.35 - July 2018
  Updated and distributed by Glenn Randers-Pehrson
@@ -5995,25 +5995,35 @@ letter, until version 1.0.6j; from then on they were given the upcoming
 public release number plus "betaNN" or "rcNN".
 
 .SH "SEE ALSO"
-.BR "png"(5)
-.IP
-The PNG (Portable Network Graphics) format specification.
+.IR libpngpf(3) ", " png(5)
 .LP
-.B libpng
+.IR libpng :
 .IP
-http://www.libpng.org/pub/png/libpng.html (canonical home page)
-.br
-https://github.com/pnggroup/libpng (canonical Git repository)
-.br
-https://libpng.sourceforge.io (downloadable archives)
+https://libpng.sourceforge.io/ (follow the [DOWNLOAD] link)
+http://www.libpng.org/pub/png
+
 .LP
-.B zlib
+.IR zlib :
 .IP
-https://zlib.net (canonical home page)
+(generally) at the same location as
+.I libpng
+or at
 .br
-https://github.com/madler/zlib (canonical Git repository)
+https://zlib.net/
+
+.LP
+.IR PNG specification: RFC 2083
+.IP
+(generally) at the same location as
+.I libpng
+or at
 .br
-A copy of zlib may also be found at the same location as libpng.
+https://www.ietf.org/rfc/rfc2083.txt
+.br
+or (as a W3C Recommendation) at
+.br
+https://www.w3.org/TR/REC-png.html
+
 .LP
 In the case of any inconsistency between the PNG specification
 and this library, the specification takes precedence.
@@ -6033,10 +6043,10 @@ Libpng:
 Initially created in 1995 by Guy Eric Schalnat, then of Group 42, Inc.
 Maintained by Cosmin Truta.
 
-Supported by the PNG development group.
+Supported by the PNG development group
 .br
-png-mng-implement at lists.sourceforge.net. (Subscription is required;
-visit https://lists.sourceforge.net/lists/listinfo/png-mng-implement
-to subscribe.)
+png-mng-implement at lists.sourceforge.net (subscription required; visit
+https://lists.sourceforge.net/lists/listinfo/png-mng-implement
+to subscribe).
 
 .\" end of man page

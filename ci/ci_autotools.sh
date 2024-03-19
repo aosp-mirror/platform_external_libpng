@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# ci_verify_configure.sh
-# Continuously integrate libpng using the configure script.
+# ci_autotools.sh
+# Continuously integrate libpng using the GNU Autotools.
 #
-# Copyright (c) 2019-2023 Cosmin Truta.
+# Copyright (c) 2019-2022 Cosmin Truta.
 #
 # This software is released under the libpng license.
 # For conditions of distribution and use, see the disclaimer
@@ -13,8 +13,8 @@ set -e
 CI_SCRIPTNAME="$(basename "$0")"
 CI_SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
 CI_SRCDIR="$(dirname "$CI_SCRIPTDIR")"
-CI_BUILDDIR="$CI_SRCDIR/out/ci_verify_configure.build"
-CI_INSTALLDIR="$CI_SRCDIR/out/ci_verify_configure.install"
+CI_BUILDDIR="$CI_SRCDIR/out/autotools.build"
+CI_INSTALLDIR="$CI_SRCDIR/out/autotools.install"
 
 function ci_info {
     printf >&2 "%s: %s\\n" "$CI_SCRIPTNAME" "$*"
@@ -32,7 +32,7 @@ function ci_spawn {
     "$@"
 }
 
-function ci_init_configure_build {
+function ci_init_autotools {
     CI_SYSTEM_NAME="$(uname -s)"
     CI_MACHINE_NAME="$(uname -m)"
     CI_MAKE="${CI_MAKE:-make}"
@@ -44,7 +44,7 @@ function ci_init_configure_build {
     [[ ! $CI_MAKE_VARS ]] || ci_err "unexpected: \$CI_MAKE_VARS='$CI_MAKE_VARS'"
 }
 
-function ci_trace_configure_build {
+function ci_trace_autotools {
     ci_info "## START OF CONFIGURATION ##"
     ci_info "system name: $CI_SYSTEM_NAME"
     ci_info "machine hardware name: $CI_MACHINE_NAME"
@@ -80,14 +80,7 @@ function ci_trace_configure_build {
     ci_info "## END OF CONFIGURATION ##"
 }
 
-function ci_cleanup_old_configure_build {
-    [[ ! -e $CI_BUILDDIR ]] ||
-        ci_spawn rm -fr "$CI_BUILDDIR"
-    [[ ! -e $CI_INSTALLDIR ]] ||
-        ci_spawn rm -fr "$CI_INSTALLDIR"
-}
-
-function ci_build_configure {
+function ci_build_autotools {
     ci_info "## START OF BUILD ##"
     # Export the configure build environment.
     [[ $CI_CC ]] && ci_spawn export CC="$CI_CC"
@@ -103,6 +96,7 @@ function ci_build_configure {
         ci_spawn export LDFLAGS="-fsanitize=$CI_SANITIZERS $LDFLAGS"
     }
     # Build and install.
+    ci_spawn rm -fr "$CI_BUILDDIR" "$CI_INSTALLDIR"
     ci_spawn mkdir -p "$CI_BUILDDIR"
     ci_spawn cd "$CI_BUILDDIR"
     ci_spawn "$CI_SRCDIR/configure" --prefix="$CI_INSTALLDIR" $CI_CONFIGURE_FLAGS
@@ -114,15 +108,10 @@ function ci_build_configure {
     ci_info "## END OF BUILD ##"
 }
 
-function main {
-    [[ $# -eq 0 ]] || {
-        ci_info "note: this program accepts environment options only"
-        ci_err "unexpected command arguments: '$*'"
-    }
-    ci_init_configure_build
-    ci_trace_configure_build
-    ci_cleanup_old_configure_build
-    ci_build_configure
+ci_init_autotools
+ci_trace_autotools
+[[ $# -eq 0 ]] || {
+    ci_info "note: this program accepts environment options only"
+    ci_err "unexpected command arguments: '$*'"
 }
-
-main "$@"
+ci_build_autotools
