@@ -111,6 +111,13 @@ cc_library {
             enabled: true,
         },
     },
+
+    sdk_version: "current",
+    min_sdk_version: "30",
+    apex_available: [
+        "com.android.mediaprovider",
+        "//apex_available:platform"
+    ],
 }
 
 // For the device (static) for NDK
