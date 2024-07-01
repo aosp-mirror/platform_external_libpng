@@ -1,22 +1,22 @@
 # This project was upgraded with external_updater.
-# Usage: tools/external_updater/updater.sh update libpng
-# For more info, check https://cs.android.com/android/platform/superproject/+/master:tools/external_updater/README.md
+# Usage: tools/external_updater/updater.sh update external/libpng
+# For more info, check https://cs.android.com/android/platform/superproject/+/main:tools/external_updater/README.md
 
 name: "libpng"
 description: "libpng is a PNG image codec."
 third_party {
-  url {
-    type: GIT
-    value: "https://github.com/glennrp/libpng.git"
-  }
-  version: "v1.6.40"
   license_type: NOTICE
   security {
     tag: "NVD-CPE2.3:cpe:/a:libpng:libpng:1.6.37"
   }
   last_upgrade_date {
-    year: 2023
+    year: 2024
     month: 6
-    day: 22
+    day: 13
+  }
+  identifier {
+    type: "Git"
+    value: "https://github.com/glennrp/libpng.git"
+    version: "v1.6.43"
   }
 }
