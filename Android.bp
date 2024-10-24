@@ -100,9 +100,6 @@ cc_library {
     // TODO(b/153609531): remove when no longer needed.
     native_bridge_supported: true,
     recovery_available: true,
-    vndk: {
-        enabled: true,
-    },
     double_loadable: true,
     host_supported: true,
     defaults: ["libpng-defaults"],
@@ -113,7 +110,7 @@ cc_library {
     },
 
     sdk_version: "current",
-    min_sdk_version: "30",
+    min_sdk_version: "apex_inherit",
     apex_available: [
         "com.android.mediaprovider",
         "//apex_available:platform"
