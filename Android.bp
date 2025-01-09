@@ -61,10 +61,10 @@ cc_defaults {
             cflags: ["-O3"],
         },
         arm64: {
-            srcs: ["arm/*",],
+            srcs: ["arm/*"],
             cflags: ["-O3"],
             exclude_srcs: [
-                "arm/filter_neon.S"
+                "arm/filter_neon.S",
             ],
         },
         x86: {
@@ -113,7 +113,7 @@ cc_library {
     min_sdk_version: "apex_inherit",
     apex_available: [
         "com.android.mediaprovider",
-        "//apex_available:platform"
+        "//apex_available:platform",
     ],
 }
 
@@ -137,7 +137,10 @@ cc_test {
     gtest: false,
     srcs: ["pngtest.c"],
     name: "pngtest",
-    cflags: ["-Wall", "-Werror"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
     shared_libs: [
         "libpng",
         "libz",
@@ -146,7 +149,7 @@ cc_test {
 
 cc_fuzz {
     name: "libpng_read_fuzzer",
-    host_supported:true,
+    host_supported: true,
 
     static_libs: [
         "libpng",
